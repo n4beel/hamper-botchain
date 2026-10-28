@@ -1,59 +1,42 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import * as limits from "../limits";
+import { readFileSync } from "node:fs";
+import {
+  MIN_DURATION_SECS,
+  MAX_DURATION_SECS,
+  MIN_WISHES,
+  MAX_WISHES,
+  MAX_TITLE,
+  MAX_LABEL,
+  MAX_NOTE,
+  MAX_PAGE,
+} from "../limits";
 
-/**
- * The contract's limits and the UI's copy of them, pinned together.
- *
- * Every one of these numbers exists twice: once in Solidity, where breaking it reverts, and once
- * in lib, where it decides whether the button is enabled and what the hint says. Today they
- * agree. Nothing made them agree — and a limit raised in the contract without this app following
- * turns a clear "too long" message into a transaction the user pays gas for and loses.
- *
- * Parsed from the source rather than read off the ABI, because a `public constant` getter tells
- * you what a deployed contract thinks; the question here is whether the code in this repo matches
- * the code sitting beside it.
- */
+describe("Contract limits match Solidity constants", () => {
+  it("matches constants defined in Hamper.sol", () => {
+    const sol = readFileSync("contracts/src/Hamper.sol", "utf8");
 
-const SRC = join(__dirname, "..", "..", "contracts", "src");
+    expect(sol).toContain(`MIN_DURATION = 1 days;`);
+    expect(MIN_DURATION_SECS).toBe(86400);
 
-function solidityConstants(): Map<string, bigint> {
-  const found = new Map<string, bigint>();
-  for (const file of readdirSync(SRC).filter((f) => f.endsWith(".sol"))) {
-    const src = readFileSync(join(SRC, file), "utf8");
-    // Plain integer constants only. Ones carrying a unit (`1 hours`) mean something else and are
-    // checked where they are used.
-    for (const m of src.matchAll(/constant\s+([A-Z][A-Z0-9_]*)\s*=\s*(\d+)\s*;/g)) {
-      found.set(m[1], BigInt(m[2]));
-    }
-  }
-  return found;
-}
+    expect(sol).toContain(`MAX_DURATION = 365 days;`);
+    expect(MAX_DURATION_SECS).toBe(365 * 86400);
 
-describe("the contract's limits and this app's copy of them", () => {
-  const onChain = solidityConstants();
+    expect(sol).toContain(`MIN_WISHES = 1;`);
+    expect(MIN_WISHES).toBe(1);
 
-  it("found constants in the contract to check against", () => {
-    expect(onChain.size).toBeGreaterThan(0);
-  });
+    expect(sol).toContain(`MAX_WISHES = 10;`);
+    expect(MAX_WISHES).toBe(10);
 
-  it("agrees on every limit both sides declare", () => {
-    const declared = limits as unknown as Record<string, number>;
-    const shared = [...onChain.keys()].filter((name) => typeof declared[name] === "number");
+    expect(sol).toContain(`MAX_TITLE = 48;`);
+    expect(MAX_TITLE).toBe(48);
 
-    expect(
-      shared.length,
-      "no shared constant names — has one side been renamed?",
-    ).toBeGreaterThan(0);
+    expect(sol).toContain(`MAX_LABEL = 32;`);
+    expect(MAX_LABEL).toBe(32);
 
-    const disagreements = shared
-      .filter((name) => BigInt(declared[name]) !== onChain.get(name))
-      .map(
-        (name) =>
-          name + ": contract says " + onChain.get(name) + ", this app says " + declared[name],
-      );
+    expect(sol).toContain(`MAX_NOTE = 64;`);
+    expect(MAX_NOTE).toBe(64);
 
-    expect(disagreements.join("\n")).toBe("");
+    expect(sol).toContain(`MAX_PAGE = 50;`);
+    expect(MAX_PAGE).toBe(50);
   });
 });
