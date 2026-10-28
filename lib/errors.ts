@@ -72,7 +72,7 @@ export function describeError(err: unknown): string {
         case "ReentrancyGuardReentrantCall":
           return "Reentrant call blocked.";
         default:
-          return `Contract error: ${decoded.errorName}`;
+          return "Transaction reverted with contract error.";
       }
     } catch {}
   }

@@ -181,17 +181,22 @@ export default function PageShell({
 
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
             <BuiltOnBotChain />
-            {links.map((link) => (
-              <a
-                key={link.url}
-                href={link.url}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="text-[var(--text-muted)] hover:text-[var(--accent)] underline transition-colors"
-              >
-                {link.label}
-              </a>
-            ))}
+            <a
+              href={links.site}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-[var(--text-muted)] hover:text-[var(--accent)] underline transition-colors"
+            >
+              botchain.ai
+            </a>
+            <a
+              href={links.explorer}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-[var(--text-muted)] hover:text-[var(--accent)] underline transition-colors"
+            >
+              scan.botchain.ai
+            </a>
           </div>
         </div>
       </footer>
