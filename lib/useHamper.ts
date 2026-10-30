@@ -1,5 +1,7 @@
 "use client";
 
+import { activeBotChain } from "@/lib/botchain/chain";
+import { assertActiveChain, checkedWrite, waitSuccess } from "@/lib/useChainWrite";
 import { useState, useCallback } from "react";
 import {
   useAccount,
@@ -207,7 +209,8 @@ export function useHamper() {
       setTxHash(null);
 
       try {
-        const hash = await walletClient.writeContract({
+        await assertActiveChain(walletClient);
+        const hash = await checkedWrite(walletClient, publicClient, {
           address: deployment.address,
           abi: hamperAbi,
           functionName: "create",
@@ -215,7 +218,7 @@ export function useHamper() {
         });
 
         setTxHash(hash);
-        const receipt = await publicClient.waitForTransactionReceipt({ hash });
+        const receipt = await waitSuccess(publicClient, hash);
 
         // Parse list ID from Created event
         let createdId: bigint = 1n; // honesty-ok: default fallback if event not found
@@ -255,7 +258,8 @@ export function useHamper() {
       setTxHash(null);
 
       try {
-        const hash = await walletClient.writeContract({
+        await assertActiveChain(walletClient);
+        const hash = await checkedWrite(walletClient, publicClient, {
           address: deployment.address,
           abi: hamperAbi,
           functionName: "give",
@@ -264,7 +268,7 @@ export function useHamper() {
         });
 
         setTxHash(hash);
-        await publicClient.waitForTransactionReceipt({ hash });
+        await waitSuccess(publicClient, hash);
         toast("success", "Chipped in successfully! Thank you for giving.");
       } catch (err) {
         const msg = describeError(err);
@@ -287,7 +291,8 @@ export function useHamper() {
       setTxHash(null);
 
       try {
-        const hash = await walletClient.writeContract({
+        await assertActiveChain(walletClient);
+        const hash = await checkedWrite(walletClient, publicClient, {
           address: deployment.address,
           abi: hamperAbi,
           functionName: "claim",
@@ -295,7 +300,7 @@ export function useHamper() {
         });
 
         setTxHash(hash);
-        await publicClient.waitForTransactionReceipt({ hash });
+        await waitSuccess(publicClient, hash);
         toast("success", "Gift claimed into your till! You can withdraw anytime.");
       } catch (err) {
         const msg = describeError(err);
@@ -322,7 +327,8 @@ export function useHamper() {
       setTxHash(null);
 
       try {
-        const hash = await walletClient.writeContract({
+        await assertActiveChain(walletClient);
+        const hash = await checkedWrite(walletClient, publicClient, {
           address: deployment.address,
           abi: hamperAbi,
           functionName: "refund",
@@ -330,7 +336,7 @@ export function useHamper() {
         });
 
         setTxHash(hash);
-        await publicClient.waitForTransactionReceipt({ hash });
+        await waitSuccess(publicClient, hash);
         toast("success", "Gift refunded into your till!");
       } catch (err) {
         const msg = describeError(err);
@@ -352,14 +358,15 @@ export function useHamper() {
     setTxHash(null);
 
     try {
-      const hash = await walletClient.writeContract({
+      await assertActiveChain(walletClient);
+      const hash = await checkedWrite(walletClient, publicClient, {
         address: deployment.address,
         abi: hamperAbi,
         functionName: "withdraw",
       });
 
       setTxHash(hash);
-      await publicClient.waitForTransactionReceipt({ hash });
+      await waitSuccess(publicClient, hash);
       toast("success", "Withdrew funds to your wallet successfully!");
     } catch (err) {
       const msg = describeError(err);

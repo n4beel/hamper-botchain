@@ -159,7 +159,8 @@ export default function WishBox({
               size="sm"
               loading={claimPending}
               onClick={() => onClaim?.(wishIndex)}
-              className="w-full shadow-md bg-white text-[var(--accent)] hover:bg-[#FFF4F8] border border-[var(--accent)] font-bold text-xs"
+              style={{ background: "#FFFFFF", color: "var(--accent-strong, #B8325F)", borderColor: "#FFFFFF" }}
+              className="w-full shadow-md font-bold text-xs"
             >
               Claim this gift
             </Button>
@@ -174,6 +175,10 @@ export default function WishBox({
           ) : isExpired ? (
             <div className="text-center text-xs font-medium text-[var(--text-muted)] py-1">
               Deadline passed
+            </div>
+          ) : isHost ? (
+            <div className="text-center text-xs font-medium text-[var(--text-muted)] py-1">
+              Hosts can&apos;t give to their own list
             </div>
           ) : (
             <Button
